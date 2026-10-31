@@ -1,0 +1,1 @@
+fn hook_draw(mesher: &Mesher<'_>, pad: &Padded, tints: &mut Tints<'_>, out: &mut SectionMesh, pos: [i32;3], origin: [f32;3], face: &BakedFace, ao: bool, state: &Info) -> core::ops::ControlFlow<()> { continuity_draw::draw(mesher,pad,tints,out,pos,origin,face,ao,state); core::ops::ControlFlow::Break(()) }

@@ -1,0 +1,64 @@
+[mod]
+id = "continuity_native"
+version = "0.1.0"
+priority = 100
+[compatibility]
+horizon_revision = "51c9565411b3fad3795b8c5ad07238976df38024"
+
+[[module]]
+id = "core"
+file = "crates/horizon-client-render/src/lib.rs"
+name = "continuity_core"
+source = "core.rs"
+
+[[module]]
+id = "loader"
+file = "crates/horizon-client-render/src/assets.rs"
+name = "continuity"
+source = "loader.rs"
+
+[[module]]
+id = "decode"
+file = "crates/horizon-client-render/src/sprites.rs"
+name = "continuity_decode"
+source = "decode.rs"
+
+[[module]]
+id = "draw"
+file = "crates/horizon-client-render/src/mesher.rs"
+name = "continuity_draw"
+source = "draw.rs"
+
+[[injection]]
+id = "load"
+target = "horizon_client_render::assets::RenderAssets::load_with"
+kind = "HEAD"
+helper = "load_hook.rs"
+bindings = [
+ { name = "root", ty = "&std::path::Path", value = "root" },
+ { name = "assets", ty = "&crate::assets::Assets", value = "assets" },
+]
+[[injection]]
+id = "face"
+target = "horizon_client_render::mesher::Mesher<'_>::face"
+kind = "HEAD"
+cancellable = true
+helper = "face_hook.rs"
+bindings = [
+ { name = "mesher", ty = "&Mesher<'_>", value = "self" },
+ { name = "pad", ty = "&Padded", value = "pad" },
+ { name = "tints", ty = "&mut Tints<'_>", value = "tints" },
+ { name = "out", ty = "&mut SectionMesh", value = "out" },
+ { name = "pos", ty = "[i32;3]", value = "pos" },
+ { name = "origin", ty = "[f32;3]", value = "origin" },
+ { name = "face", ty = "&BakedFace", value = "face" },
+ { name = "ao", ty = "bool", value = "ao" },
+ { name = "state", ty = "&Info", value = "state" },
+]
+
+[[injection]]
+id = "finish"
+target = "horizon_client_render::sprites::Sprites::finish"
+kind = "HEAD"
+helper = "finish_hook.rs"
+bindings = [{name="sprites",ty="&mut Sprites",value="self"}]
