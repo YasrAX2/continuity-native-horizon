@@ -1,4 +1,4 @@
-# Continuity Native for Horizon â€” experimental 0.1.0
+# Continuity Native for Horizon - experimental 0.1.0
 
 Native Rust implementation of part of Continuity's resource-pack functionality.
 It compiles into Horizon through its native mixin system; it does not execute Java.
@@ -11,6 +11,7 @@ Implemented:
 - `matchTiles`, `matchBlocks` with block-state property predicates, `connect=block|state|tile`, face filters and rule weight ordering.
 - PNG/animated PNG sprites loaded from resource packs' `assets/*/optifine/ctm` directories.
 - Block-model emissive overlays using `assets/minecraft/optifine/emissive.properties` and `suffix.emissive`.
+- Axis-aligned model/UV rotation support.
 - Neighbor reads across chunk boundaries, using Horizon's padded section data.
 
 Missing / limitations:
@@ -18,7 +19,7 @@ Missing / limitations:
 - Compact CTM, overlay methods, item emissive textures and Continuity's built-in packs are not included.
 - Biome/height/name restrictions, inner seams, weighted random, randomLoops, linked and symmetry properties are not implemented. Rules using them are skipped with a log warning.
 - Random placement uses an original deterministic hash; it does not reproduce Java/OptiFine random placement.
-- Rotated model UVs, multipass rules, `<default>` tiles and special pane geometry are not fully handled.
+- Non-axis-aligned UVs, multipass rules, `<default>` tiles and special pane geometry are not fully handled.
 - Source-only alpha: graphical parity, performance and compatibility with other native mods need further testing.
 - This patches private renderer functions and is pinned to one Horizon revision. Do not assume compatibility with other Nightlies.
 

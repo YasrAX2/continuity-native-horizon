@@ -11,6 +11,7 @@ pub(super) fn draw(mesher: &Mesher<'_>, pad: &Padded, tints: &mut Tints<'_>, out
         [-1,0,0] => ([0,0,1],[0,1,0]), [1,0,0] => ([0,0,-1],[0,1,0]),
         [0,1,0] => ([1,0,0],[0,0,-1]), _ => ([1,0,0],[0,0,1]),
     };
+    let (right,up)=crate::continuity_core::face_basis(face.quad.positions,face.quad.uv,(right,up));
     let mut layer=face.layer;
     let mut opaque=face.opaque;
     let mut translucent=face.translucent;

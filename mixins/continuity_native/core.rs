@@ -49,6 +49,24 @@ pub fn linear_index(first: bool, second: bool) -> usize {
     match (first,second) { (false,false)=>3, (true,false)=>2, (false,true)=>0, (true,true)=>1 }
 }
 
+/// Match adjacency to the baked texture's axes, including 90-degree model/UV rotations.
+pub fn face_basis(p:[[f32;3];4],uv:[[f32;2];4],fallback:([i32;3],[i32;3]))->([i32;3],[i32;3]) {
+    let a=[uv[1][0]-uv[0][0],uv[1][1]-uv[0][1]];
+    let b=[uv[2][0]-uv[0][0],uv[2][1]-uv[0][1]];
+    let det=a[0]*b[1]-b[0]*a[1];
+    if det.abs()<0.00001 {return fallback;}
+    let d1:[f32;3]=std::array::from_fn(|i|p[1][i]-p[0][i]);
+    let d2:[f32;3]=std::array::from_fn(|i|p[2][i]-p[0][i]);
+    let u=std::array::from_fn(|i|(d1[i]*b[1]-d2[i]*a[1])/det);
+    let up=std::array::from_fn(|i|-(d2[i]*a[0]-d1[i]*b[0])/det);
+    fn axis(v:[f32;3])->Option<[i32;3]> {
+        let i=(0..3).max_by(|&a,&b|v[a].abs().total_cmp(&v[b].abs()))?;
+        if !v[i].is_finite() || v[i].abs()<0.00001 || (0..3).any(|j|j!=i&&v[j].abs()>v[i].abs()*0.001) {return None;}
+        let mut out=[0;3];out[i]=if v[i]>0.0{1}else{-1};Some(out)
+    }
+    match (axis(u),axis(up)) {(Some(u),Some(up))=>(u,up),_=>fallback}
+}
+
 pub fn select(method:&str, mask:u8, pos:[i32;3], plane:[i32;2], dimensions:[usize;2], count:usize) -> Option<usize> {
     if count == 0 { return None; }
     let l=mask&1!=0; let r=mask&2!=0; let u=mask&4!=0; let d=mask&8!=0;
@@ -89,4 +107,10 @@ mod tests {
     #[test] fn malformed_repeat_fails() {assert_eq!(select("repeat",0,[0;3],[0;2],[0,2],6),None);}
     #[test] fn property_comments_and_continuation() {let p=properties("# x\nmethod=ctm\ntiles=0-\\\n46\n");assert_eq!(p["tiles"],"0-46");}
     #[test] fn tile_ranges_preserve_named_entries() {assert_eq!(expand_tiles("0-2 test.png <skip>"),["0","1","2","test.png","<skip>"]);}
+    #[test] fn rotated_uv_changes_connection_axes() {
+        let p=[[1.,1.,0.],[1.,0.,0.],[0.,0.,0.],[0.,1.,0.]];
+        let fallback=([-1,0,0],[0,1,0]);
+        assert_eq!(face_basis(p,[[0.,0.],[0.,1.],[1.,1.],[1.,0.]],fallback),fallback);
+        assert_eq!(face_basis(p,[[0.,1.],[1.,1.],[1.,0.],[0.,0.]],fallback),([0,-1,0],[-1,0,0]));
+    }
 }
